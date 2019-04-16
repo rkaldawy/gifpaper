@@ -1,5 +1,4 @@
 #include "gifpaper.h"
-#include "wallpaper.h"
 
 Display *disp = NULL;
 Visual *vis = NULL;
