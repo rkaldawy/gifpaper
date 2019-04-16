@@ -6,7 +6,9 @@ void main(void)
   
   Imlib_Image im; 
   char *filename = "./test.jpg";
-  load_image(&im, filename);
-
+  if (!load_image(&im, filename)){
+    printf("Background picture doesn't exist!\n");
+    return;
+  }
   set_background(im);
 }
