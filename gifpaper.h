@@ -53,6 +53,10 @@ extern XContext xid_context;
 extern Window root;
 
 int load_image(Imlib_Image * im, char *filename);
+Frame *load_images_to_list(void);
+char *generate_filename(char *prefix, int idx);
+int break_gif_into_images(char *filename);
+int clear_image_dir(void);
 
 _XFUNCPROTOBEGIN 
 extern void init_x_and_imlib(void);
