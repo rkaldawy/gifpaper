@@ -31,6 +31,15 @@
 
 #include <Imlib2.h>
 
+typedef struct Frame{
+  Pixmap pmap;
+  struct Frame *next;
+} Frame;
+
+typedef struct Gif{
+  struct Frame *head;
+} Gif;
+
 //might not be needed
 extern Window ipc_win;
 extern Atom ipc_atom;
@@ -47,7 +56,8 @@ int load_image(Imlib_Image * im, char *filename);
 
 _XFUNCPROTOBEGIN 
 extern void init_x_and_imlib(void);
-extern void set_background(Imlib_Image im); 
+extern Pixmap generate_pmap(Imlib_Image im);
+extern void set_background(Pixmap pmap_d1); 
 _XFUNCPROTOEND
 
 #endif

@@ -35,23 +35,18 @@ void init_x_and_imlib(void)
 	return;
 }
 
-//todo: find out how image gets loaded
-void set_background(Imlib_Image im)
+Pixmap generate_pmap(Imlib_Image im)
 {
   XGCValues gcvalues;
   XGCValues gcval;
 	GC gc;
 
-	Pixmap pmap_d1, pmap_d2;
-
-	XColor color;
-  Colormap cmap = DefaultColormap(disp, DefaultScreen(disp));
-
-	XAllocNamedColor(disp, cmap, "black", &color, &color);
-	pmap_d1 = XCreatePixmap(disp, root, scr->width, scr->height, depth);
+	Pixmap pmap;
+	
+  pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
 
   imlib_context_set_image(im);
-  imlib_context_set_drawable(pmap_d1);
+  imlib_context_set_drawable(pmap);
   imlib_context_set_anti_alias(0);
   imlib_context_set_dither(1);
   imlib_context_set_blend(1);
@@ -59,8 +54,20 @@ void set_background(Imlib_Image im)
 
   imlib_render_image_on_drawable_at_size(0, 0, scr->width, scr->height);
 
+  return pmap;
+}
+
+
+
+void set_background(Pixmap pmap_d1)
+{
+  XGCValues gcvalues;
+  XGCValues gcval;
+	GC gc;
+
   Display *disp2;
   Window root2;
+	Pixmap pmap_d2;
   int depth2;
   
 	disp2 = XOpenDisplay(NULL);
@@ -77,7 +84,6 @@ void set_background(Imlib_Image im)
   XFreeGC(disp2, gc);
   XSync(disp2, False);
   XSync(disp, False);
-  XFreePixmap(disp, pmap_d1);
 
 	Atom prop_root, prop_esetroot, type;
   int format, i;

@@ -1,5 +1,7 @@
 #include "gifpaper.h"
 
+//TODO: write code to split the gif myself
+
 int load_image(Imlib_Image * im, char *filename)
 {
   Imlib_Load_Error err;
