@@ -5,3 +5,7 @@ gifpaper: wallpaper.c gifpaper.c image.c gifpaper.h
 
 clean:
 	rm -rf gifpaper *.o *.inc
+
+install: gifpaper
+	@cp -f gifpaper /usr/bin
+	@chmod 755 gifpaper /usr/bin/gifpaper
