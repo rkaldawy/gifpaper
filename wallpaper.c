@@ -58,7 +58,6 @@ Pixmap generate_pmap(Imlib_Image im)
 }
 
 
-
 void set_background(Pixmap pmap_d1)
 {
   XGCValues gcvalues;
