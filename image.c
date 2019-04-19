@@ -25,6 +25,9 @@ int break_gif_into_images(char *filename)
 
   snprintf(path + strlen(path), 200, "/%s", "frame%05d.png");
   printf("%d\n", path);
+
+  //make sure the directory is clean
+  clear_image_dir();
    
   char *argv[5] = {"ffmpeg", "-i", filename, path, NULL};
 

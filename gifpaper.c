@@ -10,8 +10,6 @@ int main(int argc, char **argv)
 
   init_x_and_imlib();
 
-  clear_image_dir();
-
   int ret = break_gif_into_images(gifpath);
   if(ret < 0){
     return -1;
