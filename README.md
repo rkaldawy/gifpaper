@@ -11,3 +11,5 @@ Uses ffmpeg to break gifs into frames.
 Usage: gifpaper thing.gif
 
 Run make install to add gifpaper to your /usr/bin.
+
+Special thanks to the feh team... I based my code off of their background wallpaper code.
