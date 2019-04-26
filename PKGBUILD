@@ -1,4 +1,4 @@
-# Maintainer: Your Name <youremail@domain.com>
+# Maintainer: Remy Kaldawy <remykaldawy@gmail.com>
 pkgname=gifpaper
 pkgver=1.0.r2.g52f097d
 pkgrel=1
