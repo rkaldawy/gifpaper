@@ -1,19 +1,17 @@
 # Maintainer: Your Name <youremail@domain.com>
 pkgname=gifpaper
-pkgver=1.0
+pkgver=1.0.r2.g52f097d
 pkgrel=1
 pkgdesc="Gif wallpapers with X11"
-arch=('any')
+arch=('x86_64')
 url="https://gitlab.com/rkaldawy/gifpaper"
 license=('GPL3')
 groups=()
 depends=( 'imlib2>=1.5.1'
-          'giblib>=1.2.4'
           'libx11>=1.6.7'
           'libpng>=1.6.37'
           'ffmpeg>=1.4.1' )
 makedepends=('git')
-install=$pkgname
 source=(git+https://gitlab.com/rkaldawy/gifpaper.git)
 md5sums=('SKIP') #autofill using updpkgsums
 
