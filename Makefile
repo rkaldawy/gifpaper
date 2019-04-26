@@ -7,6 +7,4 @@ clean:
 	rm -rf gifpaper *.o *.inc
 
 install: gifpaper
-	@echo $(DESTDIR)
-	@cp -f gifpaper $(DESTDIR)/usr/bin
-	@chmod 755 gifpaper $(DESTDIR)/usr/bin/gifpaper
+	@install -Dm755 gifpaper $(DESTDIR)/usr/bin/gifpaper
