@@ -1,6 +1,8 @@
 #ifndef WALLPAPER_H
 #define WALLPAPER_H
 
+#define _GNU_SOURCE
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
