@@ -69,6 +69,7 @@ int break_gif_into_images(char *filename);
 int clear_image_dir(void);
 void *slideshow_gif_thread(void *args);
 SlideshowEntry *load_slideshow_paths(char *gifpath);
+void clean_gif_frames(Frame *head);
 
 int display_as_gif(char *gifpath, long framerate);
 int display_as_slideshow(char *dirpath, long framerate);

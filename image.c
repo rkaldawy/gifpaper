@@ -222,3 +222,14 @@ SlideshowEntry *load_slideshow_paths(char *gifpath) {
   p->next = head;
   return head;
 }
+
+void clean_gif_frames(Frame *head) {
+  Frame *c = head->next;
+  Frame *temp;
+  while (c != head) {
+    temp = c->next;
+    free(c);
+    c = temp;
+  }
+  free(head);
+}

@@ -24,6 +24,29 @@ struct timespec time_diff(struct timespec start, struct timespec end) {
   return temp;
 }
 
+struct timespec time_combine(struct timespec a, struct timespec b) {
+  struct timespec temp;
+  temp.tv_sec = a.tv_sec + b.tv_sec;
+  if (a.tv_nsec + b.tv_nsec > 999999999) {
+    temp.tv_sec += 1;
+  }
+  temp.tv_nsec = (a.tv_nsec + b.tv_nsec) % 1000000000;
+  return temp;
+}
+
+struct timespec generate_load_projection(struct timespec start,
+                                         struct timespec load_start,
+                                         struct timespec end) {
+  struct timespec load_diff, diff, temp;
+
+  load_diff = time_diff(load_start, end);
+  diff = time_diff(start, end);
+  temp.tv_sec = load_diff.tv_sec;
+  temp.tv_nsec = (long)(0.2 * load_diff.tv_nsec);
+
+  return time_combine(time_combine(diff, load_diff), temp);
+}
+
 int display_as_slideshow(char *dirpath, long framerate) {
 
   pthread_mutex_init(&timer_lock, NULL);
@@ -56,12 +79,13 @@ int display_as_slideshow(char *dirpath, long framerate) {
   w_frame.tv_nsec = 999999999 / framerate; // 1 second divided by frame rate
 
   struct timespec start, end, diff;
+  struct timespec proj, load_start;
 
   int frames_processed, file_count;
   frames_processed = 0;
 
   struct timespec w_slideshow;
-  w_slideshow.tv_sec = 60; // TODO: take this as an argument
+  w_slideshow.tv_sec = 5; // TODO: take this as an argument
   w_slideshow.tv_nsec = 0;
 
   pthread_t tid;
@@ -72,7 +96,22 @@ int display_as_slideshow(char *dirpath, long framerate) {
 
     pthread_mutex_lock(&timer_lock);
     if (timer_signal) {
-      // TODO: add a check in case the gif hasnt been fully loaded yet
+      // finish queueing next gif if not yet complete
+      if (frames_processed < file_count) {
+        printf("Delaying play to finish queueing next gif...\n");
+      }
+      while (frames_processed < file_count) {
+        load_image_to_list(n_frame, frames_processed);
+        if (frames_processed + 1 == file_count) {
+          free(n_frame->next);
+          n_frame->next = n_frame_head;
+        } else {
+          n_frame = n_frame->next;
+        }
+        frames_processed += 1;
+      }
+      // swap out gifs, and reset timer
+      clean_gif_frames(c_frame);
       c_frame = n_frame_head;
       n_frame = NULL;
       timer_signal = 0;
@@ -103,7 +142,9 @@ int display_as_slideshow(char *dirpath, long framerate) {
       clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
     } else {
       // start writing frames to the circular list
-      if (frames_processed < file_count) {
+      while (frames_processed < file_count) {
+
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &load_start);
         printf("We are loading another frame! %d\n", file_count);
         load_image_to_list(n_frame, frames_processed);
         if (frames_processed + 1 == file_count) {
@@ -113,6 +154,12 @@ int display_as_slideshow(char *dirpath, long framerate) {
           n_frame = n_frame->next;
         }
         frames_processed += 1;
+
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
+        proj = generate_load_projection(start, load_start, end);
+        if (proj.tv_sec > 0 || proj.tv_nsec >= w_frame.tv_nsec) {
+          break;
+        }
       }
       clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
     }
