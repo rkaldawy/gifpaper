@@ -31,41 +31,41 @@ int depth;
 XContext xid_context = 0;
 Window root = 0;
 
-void init_x_and_imlib(void)
-{
+void init_x_and_imlib(void) {
 
-	disp = XOpenDisplay(NULL);
-	if (!disp)
+  // XInitThreads(); // must always be the first call
+
+  disp = XOpenDisplay(NULL);
+  if (!disp)
     return;
-	vis = DefaultVisual(disp, DefaultScreen(disp));
-	depth = DefaultDepth(disp, DefaultScreen(disp));
-	cm = DefaultColormap(disp, DefaultScreen(disp));
-	root = RootWindow(disp, DefaultScreen(disp));
-	scr = ScreenOfDisplay(disp, DefaultScreen(disp));
-	xid_context = XUniqueContext();
+  vis = DefaultVisual(disp, DefaultScreen(disp));
+  depth = DefaultDepth(disp, DefaultScreen(disp));
+  cm = DefaultColormap(disp, DefaultScreen(disp));
+  root = RootWindow(disp, DefaultScreen(disp));
+  scr = ScreenOfDisplay(disp, DefaultScreen(disp));
+  xid_context = XUniqueContext();
 
-	imlib_context_set_display(disp);
-	imlib_context_set_visual(vis);
-	imlib_context_set_colormap(cm);
-	imlib_context_set_color_modifier(NULL);
-	imlib_context_set_progress_function(NULL);
-	imlib_context_set_operation(IMLIB_OP_COPY);
-  //TODO: might need to reenable this
-	//wmDeleteWindow = XInternAtom(disp, "WM_DELETE_WINDOW", False);
+  imlib_context_set_display(disp);
+  imlib_context_set_visual(vis);
+  imlib_context_set_colormap(cm);
+  imlib_context_set_color_modifier(NULL);
+  imlib_context_set_progress_function(NULL);
+  imlib_context_set_operation(IMLIB_OP_COPY);
 
-	//imlib_set_cache_size(opt.cache_size * 1024 * 1024);
+  // TODO: might need to reenable this
+  // wmDeleteWindow = XInternAtom(disp, "WM_DELETE_WINDOW", False);
 
-	return;
+  // imlib_set_cache_size(opt.cache_size * 1024 * 1024);
+
+  return;
 }
 
-Pixmap generate_pmap(Imlib_Image im)
-{
+Pixmap generate_pmap(Imlib_Image im) {
   XGCValues gcvalues;
   XGCValues gcval;
-	GC gc;
+  GC gc;
 
-	Pixmap pmap;
-	
+  Pixmap pmap;
   pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
 
   imlib_context_set_image(im);
@@ -80,21 +80,20 @@ Pixmap generate_pmap(Imlib_Image im)
   return pmap;
 }
 
-
-void set_background(Pixmap pmap_d1)
-{
+void set_background(Pixmap pmap_d1) {
   XGCValues gcvalues;
   XGCValues gcval;
-	GC gc;
+  GC gc;
 
   Display *disp2;
   Window root2;
-	Pixmap pmap_d2;
+  Pixmap pmap_d2;
   int depth2;
-  
-	disp2 = XOpenDisplay(NULL);
-		if (!disp2)
-      return;
+
+  disp2 = XOpenDisplay(NULL);
+  if (!disp2) {
+    return;
+  }
   root2 = RootWindow(disp2, DefaultScreen(disp2));
   depth2 = DefaultDepth(disp2, DefaultScreen(disp2));
   XSync(disp, False);
@@ -107,7 +106,7 @@ void set_background(Pixmap pmap_d1)
   XSync(disp2, False);
   XSync(disp, False);
 
-	Atom prop_root, prop_esetroot, type;
+  Atom prop_root, prop_esetroot, type;
   int format, i;
   unsigned long length, after;
   unsigned char *data_root = NULL, *data_esetroot = NULL;
@@ -115,20 +114,21 @@ void set_background(Pixmap pmap_d1)
   prop_root = XInternAtom(disp2, "_XROOTPMAP_ID", True);
   prop_esetroot = XInternAtom(disp2, "ESETROOT_PMAP_ID", True);
 
-  //this kills the client?
-  //why is it bad if the root and esetroot properties align?
-  //or is it just terminating the currently loaded session, before inserting the new image
+  // this kills the client?
+  // why is it bad if the root and esetroot properties align?
+  // or is it just terminating the currently loaded session, before inserting
+  // the new image
   if (prop_root != None && prop_esetroot != None) {
-    XGetWindowProperty(disp2, root2, prop_root, 0L, 1L,
-           False, AnyPropertyType, &type, &format, &length, &after, &data_root);
+    XGetWindowProperty(disp2, root2, prop_root, 0L, 1L, False, AnyPropertyType,
+                       &type, &format, &length, &after, &data_root);
     if (type == XA_PIXMAP) {
-      XGetWindowProperty(disp2, root2,
-             prop_esetroot, 0L, 1L,
-             False, AnyPropertyType,
-             &type, &format, &length, &after, &data_esetroot);
+      XGetWindowProperty(disp2, root2, prop_esetroot, 0L, 1L, False,
+                         AnyPropertyType, &type, &format, &length, &after,
+                         &data_esetroot);
       if (data_root && data_esetroot) {
-        if (type == XA_PIXMAP && *((Pixmap *) data_root) == *((Pixmap *) data_esetroot)) {
-          XKillClient(disp2, *((Pixmap *) data_root));
+        if (type == XA_PIXMAP &&
+            *((Pixmap *)data_root) == *((Pixmap *)data_esetroot)) {
+          XKillClient(disp2, *((Pixmap *)data_root));
         }
       }
     }
@@ -144,18 +144,20 @@ void set_background(Pixmap pmap_d1)
   prop_root = XInternAtom(disp2, "_XROOTPMAP_ID", False);
   prop_esetroot = XInternAtom(disp2, "ESETROOT_PMAP_ID", False);
 
-  if (prop_root == None || prop_esetroot == None)
+  if (prop_root == None || prop_esetroot == None) {
     return;
+  }
 
-  XChangeProperty(disp2, root2, prop_root, XA_PIXMAP, 32, PropModeReplace, (unsigned char *) &pmap_d2, 1);
-  XChangeProperty(disp2, root2, prop_esetroot, XA_PIXMAP, 32,
-      PropModeReplace, (unsigned char *) &pmap_d2, 1);
+  XChangeProperty(disp2, root2, prop_root, XA_PIXMAP, 32, PropModeReplace,
+                  (unsigned char *)&pmap_d2, 1);
+  XChangeProperty(disp2, root2, prop_esetroot, XA_PIXMAP, 32, PropModeReplace,
+                  (unsigned char *)&pmap_d2, 1);
 
   XSetWindowBackgroundPixmap(disp2, root2, pmap_d2);
   XClearWindow(disp2, root2);
   XFlush(disp2);
   XSetCloseDownMode(disp2, RetainPermanent);
-	XCloseDisplay(disp2);
+  XCloseDisplay(disp2);
 
-	return;
+  return;
 }

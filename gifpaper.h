@@ -3,46 +3,52 @@
 
 #define _GNU_SOURCE
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
+#include <X11/Intrinsic.h> /* Xlib, Xutil, Xresource, Xfuncproto */
 #include <X11/Xatom.h>
-#include <X11/Xos.h>
-#include <X11/keysym.h>
-#include <X11/Xresource.h>
 #include <X11/Xfuncproto.h>
-#include <X11/Intrinsic.h>	/* Xlib, Xutil, Xresource, Xfuncproto */
+#include <X11/Xlib.h>
+#include <X11/Xos.h>
+#include <X11/Xresource.h>
+#include <X11/Xutil.h>
+#include <X11/keysym.h>
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <unistd.h>
 #include <ctype.h>
-#include <sys/stat.h>
-#include <pwd.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <errno.h>
 #include <dirent.h>
-#include <stdarg.h>
-#include <signal.h>
-#include <sys/wait.h>
+#include <errno.h>
+#include <limits.h>
 #include <math.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/un.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include <Imlib2.h>
 
-typedef struct Frame{
+typedef struct Frame {
   Pixmap pmap;
   struct Frame *next;
 } Frame;
 
-typedef struct Gif{
+typedef struct Gif {
   struct Frame *head;
 } Gif;
 
-//might not be needed
+typedef struct SlideshowEntry {
+  char path[200];
+  struct SlideshowEntry *next;
+} SlideshowEntry;
+
+// might not be needed
 extern Window ipc_win;
 extern Atom ipc_atom;
 
@@ -54,16 +60,23 @@ extern int depth;
 extern XContext xid_context;
 extern Window root;
 
-int load_image(Imlib_Image * im, char *filename);
+int load_image(Imlib_Image *im, char *filename);
+Frame *load_image_to_list(Frame *c, int frame_num);
 Frame *load_images_to_list(void);
+int count_frames_in_gif(void);
 char *generate_filename(char *prefix, int idx);
 int break_gif_into_images(char *filename);
 int clear_image_dir(void);
+void *slideshow_gif_thread(void *args);
+SlideshowEntry *load_slideshow_paths(char *gifpath);
 
-_XFUNCPROTOBEGIN 
+int display_as_gif(char *gifpath, long framerate);
+int display_as_slideshow(char *dirpath, long framerate);
+
+_XFUNCPROTOBEGIN
 extern void init_x_and_imlib(void);
 extern Pixmap generate_pmap(Imlib_Image im);
-extern void set_background(Pixmap pmap_d1); 
+extern void set_background(Pixmap pmap_d1);
 _XFUNCPROTOEND
 
 #endif
