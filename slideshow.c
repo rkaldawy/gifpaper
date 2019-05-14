@@ -1,8 +1,8 @@
 #include "gifpaper.h"
 
 // signal primitives
-pthread_mutex_t timer_lock;
-int timer_signal = 0;
+static pthread_mutex_t timer_lock;
+static int timer_signal = 0;
 
 void *timer_thread(void *args) {
   struct timespec w = *(struct timespec *)args;
@@ -47,7 +47,7 @@ struct timespec generate_load_projection(struct timespec start,
   return time_combine(time_combine(diff, load_diff), temp);
 }
 
-int display_as_slideshow(char *dirpath, long framerate) {
+int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
 
   pthread_mutex_init(&timer_lock, NULL);
 
@@ -85,15 +85,13 @@ int display_as_slideshow(char *dirpath, long framerate) {
   frames_processed = 0;
 
   struct timespec w_slideshow;
-  w_slideshow.tv_sec = 5; // TODO: take this as an argument
+  w_slideshow.tv_sec = sliderate; // TODO: take this as an argument
   w_slideshow.tv_nsec = 0;
 
   pthread_t tid;
   pthread_create(&tid, NULL, timer_thread, &w_slideshow);
 
   while (True) {
-    printf("%s\n", c_gif->path);
-
     pthread_mutex_lock(&timer_lock);
     if (timer_signal) {
       // finish queueing next gif if not yet complete
@@ -117,19 +115,17 @@ int display_as_slideshow(char *dirpath, long framerate) {
       timer_signal = 0;
       c_gif = c_gif->next;
       pthread_create(&tid, NULL, timer_thread, &w_slideshow);
-      printf("Switching...\n");
+      printf("Switching gifs...\n");
     }
     pthread_mutex_unlock(&timer_lock);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
     // STEP 1: Send the frame of the current gif to the background
-    printf("%x\n", c_frame);
     set_background(c_frame->pmap);
     c_frame = c_frame->next;
 
     // STEP 2: Begin pre-loading operation
     if (n_frame == NULL) {
-      printf("We are starting gif preparation.\n");
       // prepare the gif frames and count them
       if (break_gif_into_images(c_gif->path) < 0) {
         printf("Error: file was not readable.\n");
@@ -145,7 +141,8 @@ int display_as_slideshow(char *dirpath, long framerate) {
       while (frames_processed < file_count) {
 
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &load_start);
-        printf("We are loading another frame! %d\n", file_count);
+        printf("Preloading frame %d of the next gif in the slideshow.\n",
+               frames_processed);
         load_image_to_list(n_frame, frames_processed);
         if (frames_processed + 1 == file_count) {
           free(n_frame->next);
@@ -167,7 +164,7 @@ int display_as_slideshow(char *dirpath, long framerate) {
     diff = time_diff(start, end);
 
     if (diff.tv_sec > 0 || diff.tv_nsec >= w_frame.tv_nsec) {
-      printf("Timing failure! Expect choppy frames...\n");
+      printf("Timing failure! Expect a choppy frame...\n");
       continue;
     } else {
       w_actual.tv_sec = 0;

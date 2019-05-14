@@ -72,7 +72,7 @@ SlideshowEntry *load_slideshow_paths(char *gifpath);
 void clean_gif_frames(Frame *head);
 
 int display_as_gif(char *gifpath, long framerate);
-int display_as_slideshow(char *dirpath, long framerate);
+int display_as_slideshow(char *dirpath, long framerate, long sliderate);
 
 _XFUNCPROTOBEGIN
 extern void init_x_and_imlib(void);

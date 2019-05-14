@@ -29,11 +29,12 @@ int main(int argc, char **argv) {
 
   long framerate = 6;
   int slideshow_mode = 0;
+  int sliderate = 180;
   int opt;
 
   char *endptr;
 
-  while ((opt = getopt(argc, argv, "sf:")) != -1) {
+  while ((opt = getopt(argc, argv, "s:f:")) != -1) {
     switch (opt) {
     case 'f':
       framerate = strtol(optarg, &endptr, 10);
@@ -48,15 +49,24 @@ int main(int argc, char **argv) {
       break;
     case 's':
       slideshow_mode = 1;
+      sliderate = strtol(optarg, &endptr, 10);
+      if (*optarg == '\0' || *endptr != '\0') {
+        printf("Error: slideshow rate argument not an integer.\n");
+        return -1;
+      }
+      if (sliderate <= 30) {
+        printf("Warning: fast slideshow rates may incur performance costs and "
+               "choppiness.\n");
+      }
       break;
     default:
-      printf("Usage: gifpaper [-f] wallpaper.gif\n");
+      printf("Usage: gifpaper [-fs] wallpaper.gif\n");
       return -1;
     }
   }
 
   if (optind >= argc) {
-    printf("Usage: gifpaper [-f] wallpaper.gif\n");
+    printf("Usage: gifpaper [-fs] wallpaper.gif\n");
     return -1;
   }
   char *gifpath = argv[optind];
@@ -64,7 +74,7 @@ int main(int argc, char **argv) {
   init_x_and_imlib();
 
   if (slideshow_mode) {
-    display_as_slideshow(gifpath, framerate);
+    display_as_slideshow(gifpath, framerate, sliderate);
   } else {
     display_as_gif(gifpath, framerate);
   }
