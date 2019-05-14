@@ -11,7 +11,9 @@ Uses ffmpeg to break gifs into frames.
 Now supports seamless slideshow mode! Just add -s flag, and indicate the rate at which gifs should be swapped.
 
 Usage: gifpaper -f framerate thing.gif
+
 gifpaper -f framerate -s sliderate directory/
+
 
 Run make install to add gifpaper to your /usr/bin.
 
