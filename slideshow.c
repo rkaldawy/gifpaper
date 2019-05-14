@@ -85,7 +85,7 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
   frames_processed = 0;
 
   struct timespec w_slideshow;
-  w_slideshow.tv_sec = sliderate; // TODO: take this as an argument
+  w_slideshow.tv_sec = sliderate;
   w_slideshow.tv_nsec = 0;
 
   pthread_t tid;
@@ -120,11 +120,9 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
     pthread_mutex_unlock(&timer_lock);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
-    // STEP 1: Send the frame of the current gif to the background
     set_background(c_frame->pmap);
     c_frame = c_frame->next;
 
-    // STEP 2: Begin pre-loading operation
     if (n_frame == NULL) {
       // prepare the gif frames and count them
       if (break_gif_into_images(c_gif->path) < 0) {
