@@ -228,8 +228,10 @@ void clean_gif_frames(Frame *head) {
   Frame *temp;
   while (c != head) {
     temp = c->next;
+    clear_pmap(c->pmap);
     free(c);
     c = temp;
   }
+  clear_pmap(head->pmap);
   free(head);
 }

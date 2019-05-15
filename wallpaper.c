@@ -80,6 +80,8 @@ Pixmap generate_pmap(Imlib_Image im) {
   return pmap;
 }
 
+void clear_pmap(Pixmap pmap) { XFreePixmap(disp, pmap); }
+
 void set_background(Pixmap pmap_d1) {
   XGCValues gcvalues;
   XGCValues gcval;

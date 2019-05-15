@@ -56,7 +56,6 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
     printf("Error: gif directory is empty.\n");
     return -1;
   } else if (c_gif->next == c_gif) {
-    printf("Lul");
     display_as_gif(c_gif->path, framerate);
     return 0;
   }
@@ -83,6 +82,7 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
 
   int frames_processed, file_count;
   frames_processed = 0;
+  file_count = 0; // to shut up the warning
 
   struct timespec w_slideshow;
   w_slideshow.tv_sec = sliderate;
