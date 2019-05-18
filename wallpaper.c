@@ -77,6 +77,7 @@ Pixmap generate_pmap(Imlib_Image im) {
 
   imlib_render_image_on_drawable_at_size(0, 0, scr->width, scr->height);
 
+  imlib_free_image();
   return pmap;
 }
 

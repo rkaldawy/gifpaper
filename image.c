@@ -21,7 +21,6 @@ int break_gif_into_images(char *filename) {
       mkdir(path, 0700);
     }
   }
-
   snprintf(path + strlen(path), 200, "/%s", "frame%05d.png");
 
   // make sure the directory is clean
@@ -78,8 +77,6 @@ int load_image(Imlib_Image *im, char *filename) {
     return (0);
 
   *im = imlib_load_image_without_cache(filename);
-  imlib_context_set_image(*im);
-  imlib_save_image("/tmp/test.jpg");
   if (!im) {
     return (0);
   }
@@ -108,8 +105,11 @@ Frame *load_image_to_list(Frame *c, int frame_num) {
   char *filename = generate_filename(basepath, frame_num + 1);
   if (!load_image(&im, filename)) {
     printf("Background picture doesn't exist!\n");
+    free(filename);
     return NULL;
   }
+  free(filename);
+
   c->pmap = generate_pmap(im);
   c->next = (Frame *)malloc(sizeof(Frame));
 
@@ -151,6 +151,7 @@ Frame *load_images_to_list(void) {
       printf("Background picture doesn't exist!\n");
       return NULL;
     }
+    free(filename);
     c->pmap = generate_pmap(im);
     if (i == 0) { // the first frame
       set_background(c->pmap);
