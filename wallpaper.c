@@ -52,12 +52,31 @@ void init_x_and_imlib(void) {
   imlib_context_set_progress_function(NULL);
   imlib_context_set_operation(IMLIB_OP_COPY);
 
-  // TODO: might need to reenable this
-  // wmDeleteWindow = XInternAtom(disp, "WM_DELETE_WINDOW", False);
-
-  // imlib_set_cache_size(opt.cache_size * 1024 * 1024);
-
   return;
+}
+
+Pixmap __test_create_pixmap() {
+  char *path = "/home/rkaldawy/Pictures/wallpaper-gif/japanese1.gif";
+  GC gc;
+
+  gd_GIF *gif = gd_open_gif(path);
+  char *buffer = malloc(gif->width * gif->height * gif->depth);
+  int ret = gd_get_frame(gif);
+  gd_render_frame(gif, buffer);
+
+  XImage *img;
+  img = XCreateImage(disp, vis, gif->depth, ZPixmap, 0, buffer, gif->width,
+                     gif->height, 8, 0);
+
+  printf("Hello\n");
+  Pixmap pmap;
+  pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
+
+  gc = XCreateGC(disp, pmap, 0, NULL);
+  printf("Hi!\n");
+  XPutImage(disp, pmap, gc, img, 0, 0, 0, 0, scr->width, scr->height);
+
+  return pmap;
 }
 
 Pixmap generate_pmap(Imlib_Image im) {

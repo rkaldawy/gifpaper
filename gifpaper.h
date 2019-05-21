@@ -32,6 +32,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "gifdec.h"
 #include <Imlib2.h>
 
 typedef struct Frame {
@@ -79,6 +80,8 @@ extern void init_x_and_imlib(void);
 extern Pixmap generate_pmap(Imlib_Image im);
 void clear_pmap(Pixmap pmap);
 extern void set_background(Pixmap pmap_d1);
+
+Pixmap __test_create_pixmap();
 _XFUNCPROTOEND
 
 #endif

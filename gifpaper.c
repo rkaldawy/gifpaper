@@ -23,9 +23,15 @@ int display_as_gif(char *gifpath, long framerate) {
   }
 }
 
+int main(int argc, char **argv) {
+  init_x_and_imlib();
+  Pixmap pm = __test_create_pixmap();
+  set_background(pm);
+}
+
 // display_as_slideshow in slideshow.c
 
-int main(int argc, char **argv) {
+/*int main(int argc, char **argv) {
 
   long framerate = 6;
   int slideshow_mode = 0;
@@ -78,4 +84,4 @@ int main(int argc, char **argv) {
   } else {
     display_as_gif(gifpath, framerate);
   }
-}
+}*/
