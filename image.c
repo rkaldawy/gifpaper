@@ -70,7 +70,6 @@ int clear_image_dir(void) {
 }
 
 int load_image(Imlib_Image *im, char *filename) {
-  Imlib_Load_Error err;
   imlib_context_set_progress_function(NULL);
 
   if (!filename)
