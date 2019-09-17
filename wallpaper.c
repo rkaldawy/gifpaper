@@ -60,6 +60,39 @@ void init_x_and_imlib(void) {
   return;
 }
 
+#ifdef HAVE_LIBXINERAMA
+XineramaScreenInfo *xinerama_screens = NULL;
+int xinerama_screen = 0;
+int num_xinerama_screens = 0;
+#endif /* HAVE_LIBXINERAMA */
+
+#ifdef HAVE_LIBXINERAMA
+void init_xinerama(void) {
+  if (XineramaIsActive(disp)) {
+    int major, minor, px, py, i;
+
+    /* discarded */
+    Window dw;
+    int di;
+    unsigned int du;
+
+    XineramaQueryVersion(disp, &major, &minor);
+    xinerama_screens = XineramaQueryScreens(disp, &num_xinerama_screens);
+
+    xinerama_screen = 0;
+    XQueryPointer(disp, root, &dw, &dw, &px, &py, &di, &di, &du);
+    for (i = 0; i < num_xinerama_screens; i++) {
+      if (XY_IN_RECT(px, py, xinerama_screens[i].x_org,
+                     xinerama_screens[i].y_org, xinerama_screens[i].width,
+                     xinerama_screens[i].height)) {
+        xinerama_screen = i;
+        break;
+      }
+    }
+  }
+}
+#endif /* HAVE_LIBXINERAMA */
+
 Pixmap generate_pmap(Imlib_Image im) {
   XGCValues gcvalues;
   XGCValues gcval;
@@ -68,6 +101,24 @@ Pixmap generate_pmap(Imlib_Image im) {
   Pixmap pmap;
   pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
 
+#ifdef HAVE_LIBXINERAMA
+  for (int i = 0; i < num_xinerama_screens; i++) {
+    _generate_pmap(pmap, im, xinerama_screens[i].x_org,
+                   xinerama_screens[i].y_org, xinerama_screens[i].width,
+                   xinerama_screens[i].height);
+  }
+#else
+  _generate_pmap(pmap, im, 0, 0, scr->width, scr->height);
+
+#endif /* HAVE_LIBXINERAMA */
+
+  imlib_free_image();
+
+  return pmap;
+}
+
+void _generate_pmap(Pixmap pmap, Imlib_Image im, int x, int y, int w, int h) {
+
   imlib_context_set_image(im);
   imlib_context_set_drawable(pmap);
   imlib_context_set_anti_alias(0);
@@ -75,10 +126,7 @@ Pixmap generate_pmap(Imlib_Image im) {
   imlib_context_set_blend(1);
   imlib_context_set_angle(0);
 
-  imlib_render_image_on_drawable_at_size(0, 0, scr->width, scr->height);
-
-  imlib_free_image();
-  return pmap;
+  imlib_render_image_on_drawable_at_size(x, y, w, h);
 }
 
 void clear_pmap(Pixmap pmap) { XFreePixmap(disp, pmap); }

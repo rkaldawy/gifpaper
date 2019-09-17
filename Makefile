@@ -1,7 +1,23 @@
+LDFLAGS := -lm -lpng -lX11 -lImlib2 -lpthread
+CFLAGS := -g -O2
+
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:.c=.o)
+
+xinerama ?= 1
+
+ifeq (${xinerama},1)
+	CFLAGS += -DHAVE_LIBXINERAMA
+	LDFLAGS += -lXinerama
+endif
+
 all: gifpaper
 
-gifpaper: wallpaper.c gifpaper.c image.c slideshow.c gifpaper.h
-	gcc -g -O2 -o gifpaper wallpaper.c gifpaper.c image.c slideshow.c -lm -lpng -lX11 -lImlib2 -lpthread
+gifpaper: $(OBJS)
+	gcc -o gifpaper $^ $(LDFLAGS)
+
+%.o: %.c gifpaper.h
+	gcc -c $(CFLAGS) $< -o $@
 
 clean:
 	rm -rf gifpaper *.o *.inc

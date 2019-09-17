@@ -11,6 +11,10 @@
 #include <X11/Xresource.h>
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
+#ifdef HAVE_LIBXINERAMA
+#include <X11/X.h>
+#include <X11/extensions/Xinerama.h>
+#endif /* HAVE_LIBXINERAMA */
 
 #include <ctype.h>
 #include <dirent.h>
@@ -33,6 +37,10 @@
 #include <unistd.h>
 
 #include <Imlib2.h>
+
+#define XY_IN_RECT(x, y, rx, ry, rw, rh)                                       \
+  (((x) >= (rx)) && ((y) >= (ry)) && ((x) < ((rx) + (rw))) &&                  \
+   ((y) < ((ry) + (rh))))
 
 typedef struct Frame {
   Pixmap pmap;
@@ -60,6 +68,10 @@ extern int depth;
 extern XContext xid_context;
 extern Window root;
 
+extern XineramaScreenInfo *xinerama_screens;
+extern int xinerama_screen;
+extern int num_xinerama_screens;
+
 int load_image(Imlib_Image *im, char *filename);
 Frame *load_image_to_list(Frame *c, int frame_num);
 Frame *load_images_to_list(void);
@@ -76,7 +88,9 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate);
 
 _XFUNCPROTOBEGIN
 extern void init_x_and_imlib(void);
+extern void init_xinerama(void);
 extern Pixmap generate_pmap(Imlib_Image im);
+void _generate_pmap(Pixmap pmap, Imlib_Image im, int x, int y, int w, int h);
 void clear_pmap(Pixmap pmap);
 extern void set_background(Pixmap pmap_d1);
 _XFUNCPROTOEND
