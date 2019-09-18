@@ -151,8 +151,11 @@ Frame *load_images_to_list(void) {
       return NULL;
     }
     free(filename);
-    im = crop_image(im, 0, 0, 1280, 575);
-    c->pmap = generate_pmap_test(im);
+    if (needs_crop) {
+      im = crop_image(im, crop_params[0], crop_params[1], crop_params[2],
+                      crop_params[3]);
+    }
+    c->pmap = generate_pmap(im);
     if (i == 0) { // the first frame
       set_background(c->pmap);
     }

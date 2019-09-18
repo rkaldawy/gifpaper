@@ -101,6 +101,17 @@ Imlib_Image crop_image(Imlib_Image im, int x, int y, int w, int h) {
 }
 
 Pixmap generate_pmap(Imlib_Image im) {
+  switch (display_mode) {
+  case DISPLAY_MODE_REPLICATE:
+    return generate_pmap_replicate(im);
+  case DISPLAY_MODE_EXTEND:
+    return generate_pmap_extend(im);
+  default:
+    return generate_pmap_replicate(im);
+  }
+}
+
+Pixmap generate_pmap_replicate(Imlib_Image im) {
   Pixmap pmap;
   pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
 
@@ -120,7 +131,7 @@ Pixmap generate_pmap(Imlib_Image im) {
   return pmap;
 }
 
-Pixmap generate_pmap_test(Imlib_Image im) {
+Pixmap generate_pmap_extend(Imlib_Image im) {
   Pixmap pmap;
   pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
 

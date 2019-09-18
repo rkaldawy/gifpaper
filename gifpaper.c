@@ -25,6 +25,16 @@ int display_as_gif(char *gifpath, long framerate) {
 
 // display_as_slideshow in slideshow.c
 
+static struct option long_options[] = {{"crop", required_argument, NULL, 'c'},
+                                       {"replicate", no_argument, NULL, 'r'},
+                                       {"extend", no_argument, NULL, 'e'},
+                                       {NULL, 0, NULL, 0}};
+
+int needs_crop = 0;
+int crop_params[4] = {0};
+
+int display_mode = 0;
+
 int main(int argc, char **argv) {
 
   long framerate = 6;
@@ -34,7 +44,7 @@ int main(int argc, char **argv) {
 
   char *endptr;
 
-  while ((opt = getopt(argc, argv, "s:f:")) != -1) {
+  while ((opt = getopt_long(argc, argv, "s:f:c:", long_options, NULL)) != -1) {
     switch (opt) {
     case 'f':
       framerate = strtol(optarg, &endptr, 10);
@@ -58,6 +68,30 @@ int main(int argc, char **argv) {
         printf("Warning: fast slideshow rates may incur performance costs and "
                "choppiness.\n");
       }
+      break;
+    case 'c':
+      needs_crop = 1;
+      char *num_str = strtok(optarg, " ");
+      int i;
+      for (i = 0; i < 4 && num_str != NULL; i++) {
+        crop_params[i] = strtol(num_str, &endptr, 10);
+        printf("%d\n", crop_params[i]);
+        if (*num_str == '\0' || *endptr != '\0') {
+          printf("Error: crop argument not an integer.\n");
+          return -1;
+        }
+        num_str = strtok(NULL, " ");
+      }
+      if (i < 4) {
+        printf("Caught error!");
+        return -1;
+      }
+      break;
+    case 'r':
+      display_mode = DISPLAY_MODE_REPLICATE;
+      break;
+    case 'e':
+      display_mode = DISPLAY_MODE_EXTEND;
       break;
     default:
       printf("Usage: gifpaper [-fs] wallpaper.gif\n");
