@@ -75,7 +75,6 @@ int main(int argc, char **argv) {
       int i;
       for (i = 0; i < 4 && num_str != NULL; i++) {
         crop_params[i] = strtol(num_str, &endptr, 10);
-        printf("%d\n", crop_params[i]);
         if (*num_str == '\0' || *endptr != '\0') {
           printf("Error: crop argument not an integer.\n");
           return -1;
