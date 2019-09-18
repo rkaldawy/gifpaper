@@ -89,7 +89,9 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate);
 _XFUNCPROTOBEGIN
 extern void init_x_and_imlib(void);
 extern void init_xinerama(void);
+Imlib_Image crop_image(Imlib_Image im, int x, int y, int w, int h);
 extern Pixmap generate_pmap(Imlib_Image im);
+extern Pixmap generate_pmap_test(Imlib_Image im);
 void _generate_pmap(Pixmap pmap, Imlib_Image im, int x, int y, int w, int h);
 void clear_pmap(Pixmap pmap);
 extern void set_background(Pixmap pmap_d1);

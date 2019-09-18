@@ -71,7 +71,6 @@ void init_xinerama(void) {
   if (XineramaIsActive(disp)) {
     int major, minor, px, py, i;
 
-    /* discarded */
     Window dw;
     int di;
     unsigned int du;
@@ -93,11 +92,15 @@ void init_xinerama(void) {
 }
 #endif /* HAVE_LIBXINERAMA */
 
-Pixmap generate_pmap(Imlib_Image im) {
-  XGCValues gcvalues;
-  XGCValues gcval;
-  GC gc;
+Imlib_Image crop_image(Imlib_Image im, int x, int y, int w, int h) {
+  imlib_context_set_image(im);
+  Imlib_Image ret = imlib_create_cropped_image(x, y, w, h);
+  imlib_free_image();
 
+  return ret;
+}
+
+Pixmap generate_pmap(Imlib_Image im) {
   Pixmap pmap;
   pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
 
@@ -112,6 +115,46 @@ Pixmap generate_pmap(Imlib_Image im) {
 
 #endif /* HAVE_LIBXINERAMA */
 
+  imlib_free_image();
+
+  return pmap;
+}
+
+Pixmap generate_pmap_test(Imlib_Image im) {
+  Pixmap pmap;
+  pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
+
+  imlib_context_set_image(im);
+  int im_w, im_h;
+  im_w = imlib_image_get_width();
+  im_h = imlib_image_get_height();
+  double scale = scr->width > scr->height
+                     ? ((double)im_w) / ((double)scr->width)
+                     : ((double)im_h) / ((double)scr->height);
+
+  for (int i = 0; i < num_xinerama_screens; i++) {
+
+    int diff_x, diff_y;
+    diff_x = im_w - ((double)scr->width * scale);
+    diff_y = im_h - ((double)scr->height * scale);
+
+    int sub_x, sub_y, sub_w, sub_h = 0;
+    sub_x = ((double)xinerama_screens[i].x_org * scale) + diff_x;
+    sub_y = ((double)xinerama_screens[i].y_org * scale) + diff_y;
+    sub_w = ((double)xinerama_screens[i].width * scale);
+    sub_h = ((double)xinerama_screens[i].height * scale);
+
+    imlib_context_set_image(im);
+    Imlib_Image sub_im = imlib_create_cropped_image(sub_x, sub_y, sub_w, sub_h);
+
+    _generate_pmap(pmap, sub_im, xinerama_screens[i].x_org,
+                   xinerama_screens[i].y_org, xinerama_screens[i].width,
+                   xinerama_screens[i].height);
+
+    imlib_free_image();
+  }
+
+  imlib_context_set_image(im);
   imlib_free_image();
 
   return pmap;
