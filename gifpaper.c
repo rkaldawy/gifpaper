@@ -17,7 +17,7 @@ int display_as_gif(char *gifpath, long framerate) {
   w.tv_nsec = 999999999 / framerate; // 1 second divided by frame rate
 
   while (True) {
-    set_background(head->pmap);
+    set_background(head);
     head = head->next;
     nanosleep(&w, NULL);
   }

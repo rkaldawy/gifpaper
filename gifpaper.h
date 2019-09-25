@@ -103,7 +103,7 @@ extern Pixmap generate_pmap_replicate(Imlib_Image im);
 extern Pixmap generate_pmap_extend(Imlib_Image im);
 void _generate_pmap(Pixmap pmap, Imlib_Image im, int x, int y, int w, int h);
 void clear_pmap(Pixmap pmap);
-extern void set_background(Pixmap pmap_d1);
+extern int set_background(Frame *frame);
 _XFUNCPROTOEND
 
 #endif

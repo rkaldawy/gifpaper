@@ -38,6 +38,7 @@ void init_x_and_imlib(void) {
   disp = XOpenDisplay(NULL);
   if (!disp)
     return;
+  XSetCloseDownMode(disp, RetainPermanent);
   vis = DefaultVisual(disp, DefaultScreen(disp));
   depth = DefaultDepth(disp, DefaultScreen(disp));
   cm = DefaultColormap(disp, DefaultScreen(disp));
@@ -185,55 +186,49 @@ void _generate_pmap(Pixmap pmap, Imlib_Image im, int x, int y, int w, int h) {
 
 void clear_pmap(Pixmap pmap) { XFreePixmap(disp, pmap); }
 
-void set_background(Pixmap pmap_d1) {
-  XGCValues gcvalues;
-  XGCValues gcval;
-  GC gc;
+Pixmap pmap_last;
 
-  Display *disp2;
-  Window root2;
-  Pixmap pmap_d2;
-  int depth2;
+int set_background(Frame *frame) {
 
-  disp2 = XOpenDisplay(NULL);
-  if (!disp2) {
-    return;
-  }
-  root2 = RootWindow(disp2, DefaultScreen(disp2));
-  depth2 = DefaultDepth(disp2, DefaultScreen(disp2));
-  XSync(disp, False);
-  pmap_d2 = XCreatePixmap(disp2, root2, scr->width, scr->height, depth2);
-  gcvalues.fill_style = FillTiled;
-  gcvalues.tile = pmap_d1;
-  gc = XCreateGC(disp2, pmap_d2, GCFillStyle | GCTile, &gcvalues);
-  XFillRectangle(disp2, pmap_d2, gc, 0, 0, scr->width, scr->height);
-  XFreeGC(disp2, gc);
-  XSync(disp2, False);
-  XSync(disp, False);
+  Frame *c = frame;
+  Pixmap pmap = frame->pmap;
 
   Atom prop_root, prop_esetroot, type;
   int format, i;
   unsigned long length, after;
   unsigned char *data_root = NULL, *data_esetroot = NULL;
 
-  prop_root = XInternAtom(disp2, "_XROOTPMAP_ID", True);
-  prop_esetroot = XInternAtom(disp2, "ESETROOT_PMAP_ID", True);
+  prop_root = XInternAtom(disp, "_XROOTPMAP_ID", True);
+  prop_esetroot = XInternAtom(disp, "ESETROOT_PMAP_ID", True);
 
-  // this kills the client?
-  // why is it bad if the root and esetroot properties align?
-  // or is it just terminating the currently loaded session, before inserting
-  // the new image
   if (prop_root != None && prop_esetroot != None) {
-    XGetWindowProperty(disp2, root2, prop_root, 0L, 1L, False, AnyPropertyType,
+    XGetWindowProperty(disp, root, prop_root, 0L, 1L, False, AnyPropertyType,
                        &type, &format, &length, &after, &data_root);
     if (type == XA_PIXMAP) {
-      XGetWindowProperty(disp2, root2, prop_esetroot, 0L, 1L, False,
+      XGetWindowProperty(disp, root, prop_esetroot, 0L, 1L, False,
                          AnyPropertyType, &type, &format, &length, &after,
                          &data_esetroot);
       if (data_root && data_esetroot) {
         if (type == XA_PIXMAP &&
             *((Pixmap *)data_root) == *((Pixmap *)data_esetroot)) {
-          XKillClient(disp2, *((Pixmap *)data_root));
+          // Looks like someone owns the root window. Let's see who it is!
+          // printf("Checking to see who owns the root window... \n");
+
+          Pixmap target_pmap = *((Pixmap *)data_root);
+          int kill = 1;
+          while (1) {
+            if (target_pmap == c->pmap) {
+              kill = 0;
+              break;
+            }
+            c = c->next;
+            if (c == NULL || c == frame) {
+              break;
+            }
+          }
+          if (kill) {
+            XKillClient(disp, target_pmap);
+          }
         }
       }
     }
@@ -241,28 +236,26 @@ void set_background(Pixmap pmap_d1) {
 
   if (data_root)
     XFree(data_root);
-
   if (data_esetroot)
     XFree(data_esetroot);
 
   /* This will locate the property, creating it if it doesn't exist */
-  prop_root = XInternAtom(disp2, "_XROOTPMAP_ID", False);
-  prop_esetroot = XInternAtom(disp2, "ESETROOT_PMAP_ID", False);
+  prop_root = XInternAtom(disp, "_XROOTPMAP_ID", False);
+  prop_esetroot = XInternAtom(disp, "ESETROOT_PMAP_ID", False);
 
   if (prop_root == None || prop_esetroot == None) {
-    return;
+    fprintf(stderr, "error: Creation of display pixmap properties failed.");
+    return 1;
   }
 
-  XChangeProperty(disp2, root2, prop_root, XA_PIXMAP, 32, PropModeReplace,
-                  (unsigned char *)&pmap_d2, 1);
-  XChangeProperty(disp2, root2, prop_esetroot, XA_PIXMAP, 32, PropModeReplace,
-                  (unsigned char *)&pmap_d2, 1);
+  XChangeProperty(disp, root, prop_root, XA_PIXMAP, 32, PropModeReplace,
+                  (unsigned char *)&pmap, 1);
+  XChangeProperty(disp, root, prop_esetroot, XA_PIXMAP, 32, PropModeReplace,
+                  (unsigned char *)&pmap, 1);
 
-  XSetWindowBackgroundPixmap(disp2, root2, pmap_d2);
-  XClearWindow(disp2, root2);
-  XFlush(disp2);
-  XSetCloseDownMode(disp2, RetainPermanent);
-  XCloseDisplay(disp2);
+   XSetWindowBackgroundPixmap(disp, root, pmap);
+   XClearWindow(disp, root);
+   XFlush(disp);
 
-  return;
+  return 0;
 }

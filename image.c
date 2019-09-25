@@ -157,7 +157,7 @@ Frame *load_images_to_list(void) {
     }
     c->pmap = generate_pmap(im);
     if (i == 0) { // the first frame
-      set_background(c->pmap);
+      set_background(c);
     }
     c->next = (Frame *)malloc(sizeof(Frame));
     if (i < file_count - 1) {
