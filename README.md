@@ -18,3 +18,6 @@ gifpaper -f framerate -s sliderate directory/
 Run make install to add gifpaper to your /usr/bin.
 
 Special thanks to the feh team... I based my code off of their background wallpaper code.
+
+NOTICE: Running compton's default backend with gifpaper WILL CAUSE GPU MEMORY TO LEAK.
+To fix this, run instead compton --backend xrender ...
