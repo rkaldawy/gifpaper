@@ -253,9 +253,9 @@ int set_background(Frame *frame) {
   XChangeProperty(disp, root, prop_esetroot, XA_PIXMAP, 32, PropModeReplace,
                   (unsigned char *)&pmap, 1);
 
-   XSetWindowBackgroundPixmap(disp, root, pmap);
-   XClearWindow(disp, root);
-   XFlush(disp);
+  XSetWindowBackgroundPixmap(disp, root, pmap);
+  XClearWindow(disp, root);
+  XFlush(disp);
 
   return 0;
 }
