@@ -120,7 +120,7 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
     pthread_mutex_unlock(&timer_lock);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
-    set_background(c_frame->pmap);
+    set_background(c_frame);
     c_frame = c_frame->next;
 
     if (n_frame == NULL) {
