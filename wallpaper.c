@@ -39,6 +39,7 @@ void init_x_and_imlib(void) {
   XSetCloseDownMode(disp, RetainPermanent);
   vis = DefaultVisual(disp, DefaultScreen(disp));
   depth = DefaultDepth(disp, DefaultScreen(disp));
+  printf("The depth is %d.\n", depth);
   cm = DefaultColormap(disp, DefaultScreen(disp));
   root = RootWindow(disp, DefaultScreen(disp));
   scr = ScreenOfDisplay(disp, DefaultScreen(disp));
@@ -173,6 +174,22 @@ void _generate_pmap(Pixmap pmap, Imlib_Image im, int x, int y, int w, int h) {
   imlib_context_set_angle(0);
 
   imlib_render_image_on_drawable_at_size(x, y, w, h);
+}
+
+/*Pixmap __generate_pmap(Imlib_Image im) {
+  Pixmap pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
+  _generate_pmap(pmap, im, 0, 0, scr->width, scr->height);
+}*/
+Pixmap __generate_pmap(uint8_t *buffer) {
+  Pixmap pmap;
+  printf("Hello.\n");
+  pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
+  GC gc = XCreateGC(disp, root, 0, 0);
+  XImage *img = XCreateImage(disp, CopyFromParent, depth, ZPixmap, 0,
+                             (char *)buffer, scr->width, scr->height, 32, 0);
+  XPutImage(disp, pmap, gc, img, 0, 0, 0, 0, scr->width, scr->height);
+
+  return pmap;
 }
 
 void clear_pmap(Pixmap pmap) { XFreePixmap(disp, pmap); }

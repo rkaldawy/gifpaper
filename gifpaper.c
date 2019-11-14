@@ -1,13 +1,13 @@
 #include "gifpaper.h"
 
 int display_as_gif(char *gifpath, long framerate) {
-  int ret = break_gif_into_images(gifpath);
+  /*int ret = break_gif_into_images(gifpath);
   if (ret < 0) {
     printf("Error: file was not readable.\n");
     return -1;
-  }
+  }*/
 
-  Frame *head = load_images_to_list();
+  Frame *head = __load_images_to_list(gifpath);
   if (head == NULL) {
     return -1;
   }

@@ -1,7 +1,7 @@
 LDFLAGS := -lm -lpng -lX11 -lImlib2 -lpthread
-CFLAGS := -g -O2
+CFLAGS := -g -O2 -I./gifdec
 
-SRCS=$(wildcard *.c)
+SRCS=$(wildcard *.c) $(wildcard gifdec/*.c)
 OBJS=$(SRCS:.c=.o)
 
 xinerama ?= 1

@@ -115,6 +115,82 @@ Frame *load_image_to_list(Frame *c, int frame_num) {
   return c;
 }
 
+void scale(unsigned char *dst, int dstWidth, int dstX, int dstY, int dstW,
+           int dstH, unsigned char *src, int srcWidth, int srcX, int srcY,
+           int srcW, int srcH) {
+  for (int y = 0; y < dstH; y++) {
+    for (int x = 0; x < dstW; x++) {
+      int indexDst = ((dstY + y) * dstWidth + (dstX + x)) * 4;
+      if (0) {
+        float x2f = srcX + (x * srcW / (float)dstW);
+        float y2f = srcY + (y * srcH / (float)dstH);
+        int x2 = (int)x2f;
+        int y2 = (int)y2f;
+        float dx = x2f - x2;
+        float dy = y2f - y2;
+
+        int index1 = (y2 * srcWidth + x2) * 4;
+        int index2 = (y2 * srcWidth + (x2 + 1)) * 4;
+        int index3 = ((y2 + 1) * srcWidth + x2) * 4;
+        int index4 = ((y2 + 1) * srcWidth + (x2 + 1)) * 4;
+
+        for (int i = 0; i < 3; i++) {
+          int dstTest =
+              (int)((float)src[index1 + i] * (1.0f - dx) * (1.0f - dy) +
+                    (float)src[index2 + i] * (dx) * (1.0f - dy) +
+                    (float)src[index3 + i] * (1.0f - dx) * (dy) +
+                    (float)src[index4 + i] * (dx) * (dy));
+          if (dstTest > 255)
+            dst[indexDst + i] = 255;
+          else if (dstTest < 0)
+            dst[indexDst + i] = 0;
+          else
+            dst[indexDst + i] = dstTest;
+        }
+      } else {
+        int indexSrc = ((srcY + (y * srcH / dstH)) * srcWidth +
+                        (srcX + (x * srcW / dstW))) *
+                       3;
+        dst[indexDst + 2] = src[indexSrc + 0];
+        dst[indexDst + 1] = src[indexSrc + 1];
+        dst[indexDst + 0] = src[indexSrc + 2];
+      }
+    }
+  }
+}
+
+Frame *__load_images_to_list(char *gifpath) {
+
+  Frame *p = NULL;
+  Frame *c = (Frame *)malloc(sizeof(Frame));
+  Frame *head = c;
+
+  gd_GIF *gif = gd_open_gif(gifpath);
+  uint8_t *buffer = (uint8_t *)malloc(gif->width * gif->height * 4);
+  uint8_t *scaled = (uint8_t *)malloc(scr->width * scr->height * 4);
+  for (int i = 0; gd_get_frame(gif); i++) {
+    gd_render_frame(gif, buffer);
+    scale(scaled, scr->width, 0, 0, scr->width, scr->height, buffer, gif->width,
+          0, 0, gif->width, gif->height);
+    printf("%d %d\n", buffer[1], scaled[1]);
+    c->pmap = __generate_pmap(scaled);
+    if (i == 0) { // the first frame
+      set_background(c);
+    }
+    c->next = (Frame *)malloc(sizeof(Frame));
+    p = c;
+    c = c->next;
+  }
+
+  if (p != NULL) {
+    free(c);
+    c = p;
+  }
+  c->next = head;
+
+  return head;
+}
+
 Frame *load_images_to_list(void) {
   int file_count = 0;
   DIR *dirp;
@@ -137,8 +213,6 @@ Frame *load_images_to_list(void) {
     }
   }
   closedir(dirp);
-
-  printf("%d\n", file_count);
 
   Frame *c = (Frame *)malloc(sizeof(Frame));
   Frame *head = c;

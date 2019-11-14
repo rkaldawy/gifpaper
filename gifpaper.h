@@ -37,6 +37,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "gifdec.h"
 #include <Imlib2.h>
 
 #define XY_IN_RECT(x, y, rx, ry, rw, rh)                                       \
@@ -83,6 +84,7 @@ extern int display_mode;
 int load_image(Imlib_Image *im, char *filename);
 Frame *load_image_to_list(Frame *c, int frame_num);
 Frame *load_images_to_list(void);
+Frame *__load_images_to_list(char *gifpath);
 int count_frames_in_gif(void);
 char *generate_filename(char *prefix, int idx);
 int break_gif_into_images(char *filename);
@@ -102,6 +104,8 @@ extern Pixmap generate_pmap(Imlib_Image im);
 extern Pixmap generate_pmap_replicate(Imlib_Image im);
 extern Pixmap generate_pmap_extend(Imlib_Image im);
 void _generate_pmap(Pixmap pmap, Imlib_Image im, int x, int y, int w, int h);
+// Pixmap __generate_pmap(Imlib_Image im);
+Pixmap __generate_pmap(uint8_t *buffer);
 void clear_pmap(Pixmap pmap);
 extern int set_background(Frame *frame);
 _XFUNCPROTOEND
