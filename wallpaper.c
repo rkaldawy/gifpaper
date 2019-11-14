@@ -95,33 +95,37 @@ Imlib_Image crop_image(Imlib_Image im, int x, int y, int w, int h) {
   return ret;
 }
 
-Pixmap generate_pmap(Imlib_Image im) {
+Pixmap generate_pmap(gd_GIF *gif, uint8_t *buffer) {
   switch (display_mode) {
   case DISPLAY_MODE_REPLICATE:
-    return generate_pmap_replicate(im);
+    return generate_pmap_replicate(gif, buffer);
   case DISPLAY_MODE_EXTEND:
-    return generate_pmap_extend(im);
+    // return generate_pmap_extend(buffer);
+    return generate_pmap_replicate(gif, buffer);
   default:
-    return generate_pmap_replicate(im);
+    return generate_pmap_replicate(gif, buffer);
   }
 }
 
-Pixmap generate_pmap_replicate(Imlib_Image im) {
+Pixmap generate_pmap_replicate(gd_GIF *gif, uint8_t *buffer) {
   Pixmap pmap;
   pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
+  uint8_t *scaled;
 
 #ifdef HAVE_LIBXINERAMA
   for (int i = 0; i < num_xinerama_screens; i++) {
-    _generate_pmap(pmap, im, xinerama_screens[i].x_org,
+    scaled =
+        scale_to_screen(buffer, gif->width, 0, 0, gif->width, gif->height, i);
+    _generate_pmap(pmap, scaled, xinerama_screens[i].x_org,
                    xinerama_screens[i].y_org, xinerama_screens[i].width,
                    xinerama_screens[i].height);
   }
 #else
-  _generate_pmap(pmap, im, 0, 0, scr->width, scr->height);
+  scaled =
+      scale_to_screen(buffer, gif->width, 0, 0, gif->width, gif->height, 0);
+  _generate_pmap(pmap, scaled, 0, 0, scr->width, scr->height);
 
 #endif /* HAVE_LIBXINERAMA */
-
-  imlib_free_image();
 
   return pmap;
 }
@@ -165,7 +169,7 @@ Pixmap generate_pmap_extend(Imlib_Image im) {
   return pmap;
 }
 
-void _generate_pmap(Pixmap pmap, Imlib_Image im, int x, int y, int w, int h) {
+/*void _generate_pmap(Pixmap pmap, Imlib_Image im, int x, int y, int w, int h) {
   imlib_context_set_image(im);
   imlib_context_set_drawable(pmap);
   imlib_context_set_anti_alias(0);
@@ -174,20 +178,15 @@ void _generate_pmap(Pixmap pmap, Imlib_Image im, int x, int y, int w, int h) {
   imlib_context_set_angle(0);
 
   imlib_render_image_on_drawable_at_size(x, y, w, h);
-}
-
-/*Pixmap __generate_pmap(Imlib_Image im) {
-  Pixmap pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
-  _generate_pmap(pmap, im, 0, 0, scr->width, scr->height);
 }*/
-Pixmap __generate_pmap(uint8_t *buffer) {
-  Pixmap pmap;
-  printf("Hello.\n");
-  pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
+
+Pixmap _generate_pmap(Pixmap pmap, uint8_t *buffer, int x, int y, int w,
+                      int h) {
   GC gc = XCreateGC(disp, root, 0, 0);
   XImage *img = XCreateImage(disp, CopyFromParent, depth, ZPixmap, 0,
-                             (char *)buffer, scr->width, scr->height, 32, 0);
-  XPutImage(disp, pmap, gc, img, 0, 0, 0, 0, scr->width, scr->height);
+                             (char *)buffer, w, h, 32, 0);
+  XPutImage(disp, pmap, gc, img, 0, 0, x, y, w, h);
+  XFreeGC(disp, gc);
 
   return pmap;
 }

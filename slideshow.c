@@ -47,7 +47,7 @@ struct timespec generate_load_projection(struct timespec start,
   return time_combine(time_combine(diff, load_diff), temp);
 }
 
-int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
+/*int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
 
   pthread_mutex_init(&timer_lock, NULL);
 
@@ -61,12 +61,7 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
   }
 
   Frame *c_frame, *n_frame, *n_frame_head;
-  // generate the first gif in the series
-  if (break_gif_into_images(c_gif->path) < 0) {
-    printf("Error: file was not readable.\n");
-    return -1;
-  }
-  c_frame = load_images_to_list();
+  c_frame = load_images_to_list(c_gif->path);
   if (c_frame == NULL) {
     return -1;
   }
@@ -171,4 +166,4 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
 
     nanosleep(&w_actual, NULL);
   }
-}
+}*/

@@ -82,10 +82,12 @@ extern int display_mode;
 #define DISPLAY_MODE_EXTEND 2
 
 int load_image(Imlib_Image *im, char *filename);
-Frame *load_image_to_list(Frame *c, int frame_num);
-Frame *load_images_to_list(void);
-Frame *__load_images_to_list(char *gifpath);
+
+Frame *append_image_to_list(gd_GIF *gif, Frame *c);
+Frame *load_images_to_list(char *gifpath);
+
 int count_frames_in_gif(void);
+
 char *generate_filename(char *prefix, int idx);
 int break_gif_into_images(char *filename);
 int clear_image_dir(void);
@@ -96,18 +98,27 @@ void clean_gif_frames(Frame *head);
 int display_as_gif(char *gifpath, long framerate);
 int display_as_slideshow(char *dirpath, long framerate, long sliderate);
 
+uint8_t *scale_to_screen(unsigned char *src, int srcWidth, int srcX, int srcY,
+                         int srcW, int srcH, int i);
+void scale(unsigned char *dst, int dstWidth, int dstX, int dstY, int dstW,
+           int dstH, unsigned char *src, int srcWidth, int srcX, int srcY,
+           int srcW, int srcH);
+
 _XFUNCPROTOBEGIN
 extern void init_x_and_imlib(void);
 extern void init_xinerama(void);
+
 Imlib_Image crop_image(Imlib_Image im, int x, int y, int w, int h);
-extern Pixmap generate_pmap(Imlib_Image im);
-extern Pixmap generate_pmap_replicate(Imlib_Image im);
+
+extern Pixmap generate_pmap(gd_GIF *gif, uint8_t *buffer);
+extern Pixmap generate_pmap_replicate(gd_GIF *gif, uint8_t *buffer);
 extern Pixmap generate_pmap_extend(Imlib_Image im);
-void _generate_pmap(Pixmap pmap, Imlib_Image im, int x, int y, int w, int h);
-// Pixmap __generate_pmap(Imlib_Image im);
-Pixmap __generate_pmap(uint8_t *buffer);
+
+Pixmap _generate_pmap(Pixmap pmap, uint8_t *buffer, int x, int y, int w, int h);
 void clear_pmap(Pixmap pmap);
+
 extern int set_background(Frame *frame);
+
 _XFUNCPROTOEND
 
 #endif
