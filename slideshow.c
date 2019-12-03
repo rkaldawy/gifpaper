@@ -60,12 +60,69 @@ struct timespec generate_load_projection(struct timespec start,
     return 0;
   }
 
-  Frame *c_frame, *n_frame, *n_frame_head;
+  Frame *frame, *temp, *frame_head;
+
+  temp = load_images_to_list(c_gif->path);
+  // set_background(temp);
+  // clean_gif_frames(temp);
+  // c_gif = c_gif->next;
+
+  frame = (Frame *)malloc(sizeof(Frame));
+  frame_head = frame;
+  gd_GIF *frame_hdl = gd_open_gif(c_gif->path);
+
+  int frames_processed, file_count;
+  frames_processed = 0;
+  file_count = 0; // to shut up the warning
+  file_count = count_frames_in_gif(c_gif->path);
+
+  printf("Modified!\n");
+
+  // start writing frames to the circular list
+  while (gd_get_frame(frame_hdl) > 0) {
+    append_image_to_list(frame_hdl, frame);
+
+    if (frames_processed + 1 == file_count) {
+      free(frame->next);
+      frame->next = frame_head;
+    } else {
+      frame = frame->next;
+    }
+    frames_processed += 1;
+  }
+
+  struct timespec w_frame, w_actual;
+  w_frame.tv_sec = 0;
+  w_frame.tv_nsec = 999999999 / framerate; // 1 second divided by frame rate
+
+  while (True) {
+    set_background(frame);
+    frame = frame->next;
+    nanosleep(&w_frame, NULL);
+  }
+}*/
+
+int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
+
+  pthread_mutex_init(&timer_lock, NULL);
+
+  SlideshowEntry *c_gif = load_slideshow_paths(dirpath);
+  if (c_gif == NULL) {
+    printf("Error: gif directory is empty.\n");
+    return -1;
+  } else if (c_gif->next == c_gif) {
+    display_as_gif(c_gif->path, framerate);
+    return 0;
+  }
+
+  Frame *c_frame, *n_frame, *p_frame, *n_frame_head;
+  gd_GIF *n_frame_hdl = NULL;
   c_frame = load_images_to_list(c_gif->path);
   if (c_frame == NULL) {
     return -1;
   }
   n_frame = NULL;
+  p_frame = NULL;
   c_gif = c_gif->next;
 
   struct timespec w_frame, w_actual;
@@ -93,8 +150,9 @@ struct timespec generate_load_projection(struct timespec start,
       if (frames_processed < file_count) {
         printf("Delaying play to finish queueing next gif...\n");
       }
-      while (frames_processed < file_count) {
-        load_image_to_list(n_frame, frames_processed);
+      while (gd_get_frame(n_frame_hdl) > 0) {
+        append_image_to_list(n_frame_hdl, n_frame);
+
         if (frames_processed + 1 == file_count) {
           free(n_frame->next);
           n_frame->next = n_frame_head;
@@ -104,39 +162,44 @@ struct timespec generate_load_projection(struct timespec start,
         frames_processed += 1;
       }
       // swap out gifs, and reset timer
-      clean_gif_frames(c_frame);
+      p_frame = c_frame;
       c_frame = n_frame_head;
       n_frame = NULL;
-      timer_signal = 0;
       c_gif = c_gif->next;
+
+      timer_signal = 0;
       pthread_create(&tid, NULL, timer_thread, &w_slideshow);
-      printf("Switching gifs...\n");
     }
     pthread_mutex_unlock(&timer_lock);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
-    set_background(c_frame);
+    _set_background(c_frame, p_frame);
+    if (p_frame != NULL) {
+      clean_gif_frames(p_frame);
+      p_frame = NULL;
+    }
     c_frame = c_frame->next;
 
     if (n_frame == NULL) {
-      // prepare the gif frames and count them
-      if (break_gif_into_images(c_gif->path) < 0) {
-        printf("Error: file was not readable.\n");
-        return -1;
+      if (n_frame_hdl != NULL) {
+        gd_close_gif(n_frame_hdl);
       }
+      n_frame_hdl = gd_open_gif(c_gif->path);
       frames_processed = 0;
-      file_count = count_frames_in_gif();
+      file_count = count_frames_in_gif(c_gif->path);
       n_frame = (Frame *)malloc(sizeof(Frame));
       n_frame_head = n_frame;
       clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
     } else {
       // start writing frames to the circular list
-      while (frames_processed < file_count) {
-
+      while (gd_get_frame(n_frame_hdl) > 0) {
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &load_start);
         printf("Preloading frame %d of the next gif in the slideshow.\n",
                frames_processed);
-        load_image_to_list(n_frame, frames_processed);
+
+        printf("%x\n", n_frame_hdl);
+        append_image_to_list(n_frame_hdl, n_frame);
+
         if (frames_processed + 1 == file_count) {
           free(n_frame->next);
           n_frame->next = n_frame_head;
@@ -166,4 +229,4 @@ struct timespec generate_load_projection(struct timespec start,
 
     nanosleep(&w_actual, NULL);
   }
-}*/
+}

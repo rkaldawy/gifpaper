@@ -86,8 +86,6 @@ int load_image(Imlib_Image *im, char *filename);
 Frame *append_image_to_list(gd_GIF *gif, Frame *c);
 Frame *load_images_to_list(char *gifpath);
 
-int count_frames_in_gif(void);
-
 char *generate_filename(char *prefix, int idx);
 int break_gif_into_images(char *filename);
 int clear_image_dir(void);
@@ -103,6 +101,7 @@ uint8_t *scale_to_screen(unsigned char *src, int srcWidth, int srcX, int srcY,
 void scale(unsigned char *dst, int dstWidth, int dstX, int dstY, int dstW,
            int dstH, unsigned char *src, int srcWidth, int srcX, int srcY,
            int srcW, int srcH);
+int count_frames_in_gif(char *gifpath);
 
 _XFUNCPROTOBEGIN
 extern void init_x_and_imlib(void);
@@ -118,6 +117,7 @@ Pixmap _generate_pmap(Pixmap pmap, uint8_t *buffer, int x, int y, int w, int h);
 void clear_pmap(Pixmap pmap);
 
 extern int set_background(Frame *frame);
+extern int _set_background(Frame *frame, Frame *prev);
 
 _XFUNCPROTOEND
 

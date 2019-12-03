@@ -121,7 +121,8 @@ int main(int argc, char **argv) {
   init_xinerama();
 
   if (slideshow_mode) {
-    // display_as_slideshow(gifpath, framerate, sliderate);
+    printf("Hello.\n");
+    display_as_slideshow(gifpath, framerate, sliderate);
   } else {
     display_as_gif(gifpath, framerate);
   }

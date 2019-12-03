@@ -195,8 +195,9 @@ void clear_pmap(Pixmap pmap) { XFreePixmap(disp, pmap); }
 
 Pixmap pmap_last;
 
-int set_background(Frame *frame) {
+int set_background(Frame *frame) { return _set_background(frame, NULL); }
 
+int _set_background(Frame *frame, Frame *prev) {
   Frame *c = frame;
   Pixmap pmap = frame->pmap;
 
@@ -233,7 +234,23 @@ int set_background(Frame *frame) {
               break;
             }
           }
+
+          if (prev != NULL) {
+            c = prev;
+            while (1) {
+              if (target_pmap == c->pmap) {
+                kill = 0;
+                break;
+              }
+              c = c->next;
+              if (c == NULL || c == frame) {
+                break;
+              }
+            }
+          }
+
           if (kill) {
+            printf("Killing the pixmap with the root display.\n");
             XKillClient(disp, target_pmap);
           }
         }

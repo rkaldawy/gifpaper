@@ -59,29 +59,12 @@ void scale(unsigned char *dst, int dstWidth, int dstX, int dstY, int dstW,
  * list.
  */
 
-int count_frames_in_gif() {
-  int file_count = 0;
-  DIR *dirp;
-  struct dirent *entry;
-
-  char basepath[200];
-  memset(basepath, 0x00, 200);
-
-  char *home = getenv("HOME");
-  if (!home) {
-    printf("Error: HOME directory does not exist!");
-    return -1;
+int count_frames_in_gif(char *gifpath) {
+  int file_count;
+  gd_GIF *gif = gd_open_gif(gifpath);
+  for (file_count = 0; gd_get_frame(gif); file_count++) {
   }
-  snprintf(basepath, 200, "%s/%s", home, ".config/gifpaper/.frames");
-
-  dirp = opendir(basepath);
-  while ((entry = readdir(dirp)) != NULL) {
-    if (entry->d_type == DT_REG) {
-      file_count++;
-    }
-  }
-  closedir(dirp);
-
+  gd_close_gif(gif);
   return file_count;
 }
 
@@ -125,6 +108,8 @@ Frame *load_images_to_list(char *gifpath) {
     c = p;
   }
   c->next = head;
+  free(buffer);
+  gd_close_gif(gif);
 
   return head;
 }
