@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 
   printf("%d\n", detect_charging());
 
-  long framerate = 6;
+  long framerate = 12;
   int slideshow_mode = 0;
   int sliderate = 180;
   int opt;
