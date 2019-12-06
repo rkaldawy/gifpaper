@@ -105,17 +105,19 @@ uint8_t *scale_to_screen(unsigned char *src, int srcWidth, int srcX, int srcY,
 void scale(unsigned char *dst, int dstWidth, int dstX, int dstY, int dstW,
            int dstH, unsigned char *src, int srcWidth, int srcX, int srcY,
            int srcW, int srcH);
+
+uint8_t *crop(unsigned char *src, int srcW, int srcH, int subX, int subY,
+              int subW, int subH);
+
 int count_frames_in_gif(char *gifpath);
 
 _XFUNCPROTOBEGIN
 extern void init_x_and_imlib(void);
 extern void init_xinerama(void);
 
-Imlib_Image crop_image(Imlib_Image im, int x, int y, int w, int h);
-
-extern Pixmap generate_pmap(gd_GIF *gif, uint8_t *buffer);
-extern Pixmap generate_pmap_replicate(gd_GIF *gif, uint8_t *buffer);
-extern Pixmap generate_pmap_extend(Imlib_Image im);
+extern Pixmap generate_pmap(uint8_t *buffer, int srcW, int srcH);
+extern Pixmap generate_pmap_replicate(uint8_t *buffer, int srcW, int srcH);
+extern Pixmap generate_pmap_extend(uint8_t *buffer, int srcW, int srcH);
 
 Pixmap _generate_pmap(Pixmap pmap, uint8_t *buffer, int x, int y, int w, int h);
 void clear_pmap(Pixmap pmap);

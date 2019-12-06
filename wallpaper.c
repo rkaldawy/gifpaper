@@ -87,42 +87,31 @@ void init_xinerama(void) {
 }
 #endif /* HAVE_LIBXINERAMA */
 
-Imlib_Image crop_image(Imlib_Image im, int x, int y, int w, int h) {
-  imlib_context_set_image(im);
-  Imlib_Image ret = imlib_create_cropped_image(x, y, w, h);
-  imlib_free_image();
-
-  return ret;
-}
-
-Pixmap generate_pmap(gd_GIF *gif, uint8_t *buffer) {
+Pixmap generate_pmap(uint8_t *buffer, int srcW, int srcH) {
   switch (display_mode) {
   case DISPLAY_MODE_REPLICATE:
-    return generate_pmap_replicate(gif, buffer);
+    return generate_pmap_replicate(buffer, srcW, srcH);
   case DISPLAY_MODE_EXTEND:
-    // return generate_pmap_extend(buffer);
-    return generate_pmap_replicate(gif, buffer);
+    return generate_pmap_extend(buffer, srcW, srcH);
   default:
-    return generate_pmap_replicate(gif, buffer);
+    return generate_pmap_replicate(buffer, srcW, srcH);
   }
 }
 
-Pixmap generate_pmap_replicate(gd_GIF *gif, uint8_t *buffer) {
+Pixmap generate_pmap_replicate(uint8_t *buffer, int srcW, int srcH) {
   Pixmap pmap;
   pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
   uint8_t *scaled;
 
 #ifdef HAVE_LIBXINERAMA
   for (int i = 0; i < num_xinerama_screens; i++) {
-    scaled =
-        scale_to_screen(buffer, gif->width, 0, 0, gif->width, gif->height, i);
+    scaled = scale_to_screen(buffer, srcW, 0, 0, srcW, srcH, i);
     _generate_pmap(pmap, scaled, xinerama_screens[i].x_org,
                    xinerama_screens[i].y_org, xinerama_screens[i].width,
                    xinerama_screens[i].height);
   }
 #else
-  scaled =
-      scale_to_screen(buffer, gif->width, 0, 0, gif->width, gif->height, 0);
+  scaled = scale_to_screen(buffer, srcW, 0, 0, srcW, srcH, 0);
   _generate_pmap(pmap, scaled, 0, 0, scr->width, scr->height);
 
 #endif /* HAVE_LIBXINERAMA */
@@ -130,14 +119,13 @@ Pixmap generate_pmap_replicate(gd_GIF *gif, uint8_t *buffer) {
   return pmap;
 }
 
-Pixmap generate_pmap_extend(Imlib_Image im) {
+Pixmap generate_pmap_extend(uint8_t *buffer, int srcW, int srcH) {
   Pixmap pmap;
   pmap = XCreatePixmap(disp, root, scr->width, scr->height, depth);
 
-  imlib_context_set_image(im);
   int im_w, im_h;
-  im_w = imlib_image_get_width();
-  im_h = imlib_image_get_height();
+  im_w = srcW;
+  im_h = srcH;
   double scale = scr->width > scr->height
                      ? ((double)im_w) / ((double)scr->width)
                      : ((double)im_h) / ((double)scr->height);
@@ -153,18 +141,19 @@ Pixmap generate_pmap_extend(Imlib_Image im) {
     sub_w = ((double)xinerama_screens[i].width * scale);
     sub_h = ((double)xinerama_screens[i].height * scale);
 
-    imlib_context_set_image(im);
-    Imlib_Image sub_im = imlib_create_cropped_image(sub_x, sub_y, sub_w, sub_h);
+    uint8_t *cropped;
+    cropped = crop(buffer, srcW, srcH, sub_x, sub_y, sub_w, sub_h);
 
-    _generate_pmap(pmap, sub_im, xinerama_screens[i].x_org,
+    uint8_t *scaled;
+    scaled = scale_to_screen(cropped, sub_w, 0, 0, sub_w, sub_h, i);
+    free(cropped);
+
+    _generate_pmap(pmap, scaled, xinerama_screens[i].x_org,
                    xinerama_screens[i].y_org, xinerama_screens[i].width,
                    xinerama_screens[i].height);
 
-    imlib_free_image();
+    free(scaled);
   }
-
-  imlib_context_set_image(im);
-  imlib_free_image();
 
   return pmap;
 }

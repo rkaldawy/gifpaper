@@ -55,6 +55,29 @@ void scale(unsigned char *dst, int dstWidth, int dstX, int dstY, int dstW,
 }
 
 /**
+ * Crop a gif frame to a new specified size. Note that this function expects gif
+ * frames in RGB format; thus, crop operations must take place before the final
+ * scaling operations.
+ */
+
+uint8_t *crop(unsigned char *src, int srcW, int srcH, int subX, int subY,
+              int subW, int subH) {
+
+  uint8_t *dst = (uint8_t *)malloc(subW * subH * 3);
+  int dst_idx = 0;
+
+  int src_idx = subY * (srcW * 3) + (subX * 3);
+  for (int i = subY; i < subY + subH; i++) {
+    memcpy(&dst[dst_idx], &src[src_idx], subW * 3);
+
+    src_idx += srcW * 3;
+    dst_idx += subW * 3;
+  }
+
+  return dst;
+}
+
+/**
  * Counts the number of frames in the gif, by cycling through gifdec's linked
  * list.
  */
@@ -72,7 +95,7 @@ Frame *append_image_to_list(gd_GIF *gif, Frame *c) {
   uint8_t *buffer = (uint8_t *)malloc(gif->width * gif->height * 4);
   gd_render_frame(gif, buffer);
   // todo: handle cropping, once a config file exists
-  c->pmap = generate_pmap(gif, buffer);
+  c->pmap = generate_pmap(buffer, gif->width, gif->height);
   c->next = (Frame *)malloc(sizeof(Frame));
   free(buffer);
 
@@ -89,12 +112,18 @@ Frame *load_images_to_list(char *gifpath) {
 
   for (int i = 0; gd_get_frame(gif); i++) {
     gd_render_frame(gif, buffer);
+
     if (needs_crop) {
-      // todo: reimplement cropping.
-      // buffer = crop(buffer, crop_params[0], crop_params[1], crop_params[2],
-      //              crop_params[3]);
+      uint8_t *cropped;
+      cropped = crop(buffer, gif->width, gif->height, crop_params[0],
+                     crop_params[1], crop_params[2], crop_params[3]);
+
+      c->pmap = generate_pmap(cropped, crop_params[2], crop_params[3]);
+      free(cropped);
+    } else {
+      c->pmap = generate_pmap(buffer, gif->width, gif->height);
     }
-    c->pmap = generate_pmap(gif, buffer);
+
     if (i == 0) { // the first frame
       set_background(c);
     }
