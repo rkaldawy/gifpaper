@@ -4,7 +4,7 @@
  * gifs. This will eventually be converted into a config file handler.
  */
 
-int break_gif_into_images(char *filename) {
+/*int break_gif_into_images(char *filename) {
   char path[200];
   memset(path, 0x00, 200);
   char *subpath[3] = {".config", "gifpaper", ".frames"};
@@ -73,22 +73,9 @@ int clear_image_dir(void) {
   return 0;
 }
 
-int load_image(Imlib_Image *im, char *filename) {
-  imlib_context_set_progress_function(NULL);
-
-  if (!filename)
-    return (0);
-
-  *im = imlib_load_image_without_cache(filename);
-  if (!im) {
-    return (0);
-  }
-  return (1);
-}
-
 char *generate_filename(char *prefix, int idx) {
   char buf[200];
   memset(buf, 0x00, 200);
   snprintf(buf, 200, "%s/frame%05d.png", prefix, idx);
   return strndup(buf, 200);
-}
+}*/

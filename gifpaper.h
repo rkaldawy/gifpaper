@@ -38,7 +38,6 @@
 #include <unistd.h>
 
 #include "gifdec.h"
-#include <Imlib2.h>
 
 #define XY_IN_RECT(x, y, rx, ry, rw, rh)                                       \
   (((x) >= (rx)) && ((y) >= (ry)) && ((x) < ((rx) + (rw))) &&                  \
@@ -82,17 +81,13 @@ extern int battery_saver;
 #define DISPLAY_MODE_REPLICATE 1
 #define DISPLAY_MODE_EXTEND 2
 
-int load_image(Imlib_Image *im, char *filename);
-
 Frame *append_image_to_list(gd_GIF *gif, Frame *c);
 Frame *load_images_to_list(char *gifpath);
 
-char *generate_filename(char *prefix, int idx);
-int break_gif_into_images(char *filename);
-int clear_image_dir(void);
-void *slideshow_gif_thread(void *args);
 SlideshowEntry *load_slideshow_paths(char *gifpath);
 void clean_gif_frames(Frame *head);
+
+void *slideshow_gif_thread(void *args);
 
 int display_as_gif(char *gifpath, long framerate);
 int display_as_slideshow(char *dirpath, long framerate, long sliderate);
@@ -112,7 +107,7 @@ uint8_t *crop(unsigned char *src, int srcW, int srcH, int subX, int subY,
 int count_frames_in_gif(char *gifpath);
 
 _XFUNCPROTOBEGIN
-extern void init_x_and_imlib(void);
+extern void init_x(void);
 extern void init_xinerama(void);
 
 extern Pixmap generate_pmap(uint8_t *buffer, int srcW, int srcH);

@@ -31,7 +31,7 @@ int depth;
 XContext xid_context = 0;
 Window root = 0;
 
-void init_x_and_imlib(void) {
+void init_x(void) {
   // XInitThreads(); // must always be the first call
   disp = XOpenDisplay(NULL);
   if (!disp)
@@ -44,13 +44,6 @@ void init_x_and_imlib(void) {
   root = RootWindow(disp, DefaultScreen(disp));
   scr = ScreenOfDisplay(disp, DefaultScreen(disp));
   xid_context = XUniqueContext();
-
-  imlib_context_set_display(disp);
-  imlib_context_set_visual(vis);
-  imlib_context_set_colormap(cm);
-  imlib_context_set_color_modifier(NULL);
-  imlib_context_set_progress_function(NULL);
-  imlib_context_set_operation(IMLIB_OP_COPY);
 
   return;
 }

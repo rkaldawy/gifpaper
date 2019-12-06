@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
   }
   char *gifpath = argv[optind];
 
-  init_x_and_imlib();
+  init_x();
   init_xinerama();
 
   if (slideshow_mode) {
