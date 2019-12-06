@@ -11,6 +11,7 @@ int display_as_gif(char *gifpath, long framerate) {
   w.tv_nsec = 999999999 / framerate; // 1 second divided by frame rate
 
   while (True) {
+    check_power_conditions();
     set_background(head);
     head = head->next;
     nanosleep(&w, NULL);
@@ -23,6 +24,7 @@ static struct option long_options[] = {{"crop", required_argument, NULL, 'c'},
                                        {"replicate", no_argument, NULL, 'r'},
                                        {"extend", no_argument, NULL, 'e'},
                                        {"help", no_argument, NULL, 'h'},
+                                       {"power-save", no_argument, NULL, 'p'},
                                        {NULL, 0, NULL, 0}};
 
 const char *help_string =
@@ -34,6 +36,7 @@ Options: \n\
 -s SLIDESHOW_RATE         Slideshow mode. Must provide a directory with gifs. \n\
 -h, --help                Show this help menu. \n\
     --crop 'x0 y0 x1 y1'  Crop gif to the dimensions speficied by the coordinates. \n\
+    --power-save           Only run the gif if the battery is charging. \n\
 \n\
 Multihead Options : \n\
     --extend              Extend the gif, scaled, across all monitors. \n\
@@ -42,11 +45,16 @@ Multihead Options : \n\
 Please report bugs to <remykaldawy@gmail.com>.\n";
 
 int needs_crop = 0;
+int battery_saver = 0;
+
 int crop_params[4] = {0};
 
 int display_mode = 0;
 
 int main(int argc, char **argv) {
+
+  printf("%d\n", detect_charging());
+
   long framerate = 6;
   int slideshow_mode = 0;
   int sliderate = 180;
@@ -105,6 +113,13 @@ int main(int argc, char **argv) {
     case 'h':
       printf("%s", help_string);
       return 0;
+    case 'p':
+      if (detect_charging() < 0) {
+        printf("Warning: cannot use battery saving mode.\n");
+      } else {
+        battery_saver = 1;
+      }
+      break;
     default:
       printf("Error: invalid option at '%s'\n", argv[optind]);
       return -1;

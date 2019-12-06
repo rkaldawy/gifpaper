@@ -77,6 +77,7 @@ extern int num_xinerama_screens;
 extern int needs_crop;
 extern int crop_params[];
 extern int display_mode;
+extern int battery_saver;
 
 #define DISPLAY_MODE_REPLICATE 1
 #define DISPLAY_MODE_EXTEND 2
@@ -95,6 +96,9 @@ void clean_gif_frames(Frame *head);
 
 int display_as_gif(char *gifpath, long framerate);
 int display_as_slideshow(char *dirpath, long framerate, long sliderate);
+
+int check_power_conditions();
+int detect_charging();
 
 uint8_t *scale_to_screen(unsigned char *src, int srcWidth, int srcX, int srcY,
                          int srcW, int srcH, int i);

@@ -250,7 +250,6 @@ int _set_background(Frame *frame, Frame *prev) {
           }
 
           if (kill) {
-            printf("Killing the pixmap with the root display.\n");
             XKillClient(disp, target_pmap);
           }
         }

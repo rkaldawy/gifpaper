@@ -47,61 +47,6 @@ struct timespec generate_load_projection(struct timespec start,
   return time_combine(time_combine(diff, load_diff), temp);
 }
 
-/*int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
-
-  pthread_mutex_init(&timer_lock, NULL);
-
-  SlideshowEntry *c_gif = load_slideshow_paths(dirpath);
-  if (c_gif == NULL) {
-    printf("Error: gif directory is empty.\n");
-    return -1;
-  } else if (c_gif->next == c_gif) {
-    display_as_gif(c_gif->path, framerate);
-    return 0;
-  }
-
-  Frame *frame, *temp, *frame_head;
-
-  temp = load_images_to_list(c_gif->path);
-  // set_background(temp);
-  // clean_gif_frames(temp);
-  // c_gif = c_gif->next;
-
-  frame = (Frame *)malloc(sizeof(Frame));
-  frame_head = frame;
-  gd_GIF *frame_hdl = gd_open_gif(c_gif->path);
-
-  int frames_processed, file_count;
-  frames_processed = 0;
-  file_count = 0; // to shut up the warning
-  file_count = count_frames_in_gif(c_gif->path);
-
-  printf("Modified!\n");
-
-  // start writing frames to the circular list
-  while (gd_get_frame(frame_hdl) > 0) {
-    append_image_to_list(frame_hdl, frame);
-
-    if (frames_processed + 1 == file_count) {
-      free(frame->next);
-      frame->next = frame_head;
-    } else {
-      frame = frame->next;
-    }
-    frames_processed += 1;
-  }
-
-  struct timespec w_frame, w_actual;
-  w_frame.tv_sec = 0;
-  w_frame.tv_nsec = 999999999 / framerate; // 1 second divided by frame rate
-
-  while (True) {
-    set_background(frame);
-    frame = frame->next;
-    nanosleep(&w_frame, NULL);
-  }
-}*/
-
 int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
 
   pthread_mutex_init(&timer_lock, NULL);
@@ -148,7 +93,7 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
     if (timer_signal) {
       // finish queueing next gif if not yet complete
       if (frames_processed < file_count) {
-        printf("Delaying play to finish queueing next gif...\n");
+        printf("Warning: Delaying play to finish queueing next gif...\n");
       }
       while (gd_get_frame(n_frame_hdl) > 0) {
         append_image_to_list(n_frame_hdl, n_frame);
@@ -173,6 +118,8 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
     pthread_mutex_unlock(&timer_lock);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
+    check_power_conditions();
+
     _set_background(c_frame, p_frame);
     if (p_frame != NULL) {
       clean_gif_frames(p_frame);
@@ -194,10 +141,9 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
       // start writing frames to the circular list
       while (gd_get_frame(n_frame_hdl) > 0) {
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &load_start);
-        printf("Preloading frame %d of the next gif in the slideshow.\n",
-               frames_processed);
+        // printf("Preloading frame %d of the next gif in the slideshow.\n",
+        // frames_processed);
 
-        printf("%x\n", n_frame_hdl);
         append_image_to_list(n_frame_hdl, n_frame);
 
         if (frames_processed + 1 == file_count) {
