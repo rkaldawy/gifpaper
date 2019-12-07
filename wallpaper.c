@@ -39,7 +39,6 @@ void init_x(void) {
   XSetCloseDownMode(disp, RetainPermanent);
   vis = DefaultVisual(disp, DefaultScreen(disp));
   depth = DefaultDepth(disp, DefaultScreen(disp));
-  printf("The depth is %d.\n", depth);
   cm = DefaultColormap(disp, DefaultScreen(disp));
   root = RootWindow(disp, DefaultScreen(disp));
   scr = ScreenOfDisplay(disp, DefaultScreen(disp));
@@ -150,17 +149,6 @@ Pixmap generate_pmap_extend(uint8_t *buffer, int srcW, int srcH) {
 
   return pmap;
 }
-
-/*void _generate_pmap(Pixmap pmap, Imlib_Image im, int x, int y, int w, int h) {
-  imlib_context_set_image(im);
-  imlib_context_set_drawable(pmap);
-  imlib_context_set_anti_alias(0);
-  imlib_context_set_dither(1);
-  imlib_context_set_blend(1);
-  imlib_context_set_angle(0);
-
-  imlib_render_image_on_drawable_at_size(x, y, w, h);
-}*/
 
 Pixmap _generate_pmap(Pixmap pmap, uint8_t *buffer, int x, int y, int w,
                       int h) {

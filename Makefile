@@ -1,4 +1,4 @@
-LDFLAGS := -lm -lpng -lX11 -lImlib2 -lpthread
+LDFLAGS := -lm -lX11 -lpthread
 CFLAGS := -g -O2 -I./gifdec
 
 SRCS=$(wildcard *.c) $(wildcard gifdec/*.c)
