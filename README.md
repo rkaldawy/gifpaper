@@ -1,6 +1,27 @@
 # GIFPAPER
 
-##About
+## About
+
+[Gifpaper] is a lightweight utility to draw gif frames to the X root window (i.e. *GIF wallpapers*).
+
+Some of [Gifpaper]'s features include:
+
+* drawing gifs onto the X root window
+* playing a slideshow of gifs stored in a single directory
+* cropping the gif before it gets displayed
+* multihead support which replicates the gif on each monitor
+* multihead support which scales and extends the gif over all monitors
+* power saving mode which halts the gif if the battery is discharging
+
+![Example-wallpaper](https://imgur.com/a/wZC3jhN)
+
+### Why [Gifpaper]?
+
+[Gifpaper] is designed to minimize the performance cost of loading each frame to the root window. This
+is primarily done by cacheing each frame of the gif as a Pixmap, so that at runtime the pixmap need only
+be drawn to the background. The draw operation itself has also been optimized to use as few Xlib calls
+as possible. [Gifpaper] is a **lightweight**, **performant**, and **customizable** utlility to create
+GIF wallpapers. 
 
 This program runs .gif animations as wallpapers using X11. The code builds on how
 feh loads background images.
