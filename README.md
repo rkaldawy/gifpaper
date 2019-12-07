@@ -1,8 +1,6 @@
-# GIFPAPER
-
 ## About
 
-Gifpaper is a lightweight utility to draw gif frames to the X root window (i.e. *GIF wallpapers*).
+**Gifpaper** is a lightweight utility to draw gif frames to the X root window (i.e. *GIF wallpapers*).
 
 Some of Gifpaper's features include:
 
