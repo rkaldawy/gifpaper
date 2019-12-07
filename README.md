@@ -13,7 +13,7 @@ Some of [Gifpaper]'s features include:
 * multihead support which scales and extends the gif over all monitors
 * power saving mode which halts the gif if the battery is discharging
 
-![Example-wallpaper](https://gitlab.com/rkaldawy/readme_resources/blob/master/out.gif)
+![Example-wallpaper](https://i.imgur.com/DDPtlci.gif)
 
 ### Why [Gifpaper]?
 
