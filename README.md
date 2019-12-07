@@ -1,4 +1,6 @@
-# gifpaper
+# GIFPAPER
+
+##About
 
 This program runs .gif animations as wallpapers using X11. The code builds on how
 feh loads background images.
