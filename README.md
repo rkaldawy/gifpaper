@@ -20,12 +20,12 @@ Here is an example of gifpaper on my personal machine:
 Gifpaper is designed to minimize the performance cost of loading each frame to the root window. This
 is primarily done by cacheing each frame of the gif as a Pixmap, so that at runtime the pixmap need only
 be drawn to the background. The draw operation itself has also been optimized to use as few Xlib calls
-as possible. [Gifpaper] is a **lightweight**, **performant**, and **customizable** utlility to create
+as possible. Gifpaper is a **lightweight**, **performant**, and **customizable** utlility to create
 GIF wallpapers. 
 
 ## Installation
 
-Clone with `git clone` and make with `make install`. It's as simple as that.
+Clone with `git clone` and install with `make install`. It's as simple as that.
 
 ## Usage
 
