@@ -20,7 +20,7 @@ gifpaper: $(OBJS)
 	gcc -c $(CFLAGS) $< -o $@
 
 clean:
-	rm -rf gifpaper *.o *.inc
+	rm -rf gifpaper *.o *.inc gifdec/*.o
 
 install: gifpaper
 	@install -Dm755 gifpaper $(DESTDIR)/usr/bin/gifpaper

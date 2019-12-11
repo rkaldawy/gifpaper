@@ -93,7 +93,7 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
     if (timer_signal) {
       // finish queueing next gif if not yet complete
       if (frames_processed < file_count) {
-        printf("Warning: Delaying play to finish queueing next gif...\n");
+        printf("Delaying play to finish queueing next gif...\n");
       }
       while (gd_get_frame(n_frame_hdl) > 0) {
         append_image_to_list(n_frame_hdl, n_frame);
@@ -141,8 +141,6 @@ int display_as_slideshow(char *dirpath, long framerate, long sliderate) {
       // start writing frames to the circular list
       while (gd_get_frame(n_frame_hdl) > 0) {
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &load_start);
-        // printf("Preloading frame %d of the next gif in the slideshow.\n",
-        // frames_processed);
 
         append_image_to_list(n_frame_hdl, n_frame);
 
